@@ -10,11 +10,19 @@ class ServiceDnf {
   CustomSubject<RecommendedData> subject = CustomSubject<RecommendedData>();
 
   /// 추천 결과를 타입 세이프한 모델로 반환
-  Future<RecommendedData?> getRecommendation() async {
+  Future<RecommendedData?> getRecommendation({
+    String server = 'casillas',
+    String id = 'horoli',
+    String? gold,
+  }) async {
     try {
-      final Uri url = Uri.parse(
-        '${PATH.URL_BASE}/${PATH.URL_RECOMMEND}?server=casillas&name=horoli&limit=5',
-      );
+      final Uri url = gold == null
+          ? Uri.parse(
+              '${PATH.URL_BASE}/${PATH.URL_RECOMMEND}?server=$server&name=$id&limit=5',
+            )
+          : Uri.parse(
+              '${PATH.URL_BASE}/${PATH.URL_RECOMMEND}?server=$server&name=$id&gold=$gold&limit=5',
+            );
 
       final http.Response response = await http.get(url);
 

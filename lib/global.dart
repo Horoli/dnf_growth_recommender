@@ -44,3 +44,11 @@ String itemImgUrl(String base, String path, String id, {String? zoom}) {
   final z = (zoom == null || zoom.isEmpty) ? '' : '&zoom=$zoom';
   return "$base/$path?type=item&id=$id$z";
 }
+
+Widget buildCommonCard({Widget? child}) => Card(
+      margin: const EdgeInsets.all(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: child,
+      ),
+    );
