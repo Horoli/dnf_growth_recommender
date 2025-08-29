@@ -11,7 +11,7 @@ class AppRootState extends State<AppRoot> {
   @override
   Widget build(BuildContext context) {
     Map<String, Widget Function(BuildContext)> routes = {
-      PATH.ROUTE_SEARCH: (BuildContext contxt) => const ViewSearch(),
+      PATH.ROUTE_SEARCH: (BuildContext contxt) => const ViewHome(),
     };
 
     return MaterialApp(

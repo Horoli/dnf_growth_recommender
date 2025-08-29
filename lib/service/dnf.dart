@@ -7,10 +7,10 @@ class ServiceDnf {
 
   ServiceDnf._internal();
 
-  CustomSubject<RecommendedData> subject = CustomSubject<RecommendedData>();
+  CustomSubject<MRecommended> subject = CustomSubject<MRecommended>();
 
   /// 추천 결과를 타입 세이프한 모델로 반환
-  Future<RecommendedData?> getRecommendation({
+  Future<MRecommended?> getRecommendation({
     String server = 'casillas',
     String id = 'horoli',
     String? gold,
@@ -29,10 +29,11 @@ class ServiceDnf {
       if (response.statusCode == 200) {
         // ✅ JSON → Model 파싱
         final Map<String, dynamic> data = json.decode(response.body);
-        final RecommendedData result = RecommendedData.fromJson(data);
+        final MRecommended result = MRecommended.fromJson(data);
         // 디버깅용 출력
         print('[DNF] character=${result.character.characterName} '
             'slots=${result.summary.totalSlots}');
+
         subject.sink(result);
         return result;
       } else {

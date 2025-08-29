@@ -2,7 +2,7 @@ part of 'dnf_growth_recommender.dart';
 
 late ServiceDnf GServiceDnf;
 
-extension EquippedItemIds on Map<String, SlotRecommendation> {
+extension EquippedItemIds on Map<String, MSlotRecommendation> {
   String? get weaponId => this['WEAPON']?.equippedItemId;
   String? get titleId => this['TITLE']?.equippedItemId;
   String? get jacketId => this['JACKET']?.equippedItemId;
@@ -52,3 +52,44 @@ Widget buildCommonCard({Widget? child}) => Card(
         child: child,
       ),
     );
+
+String statsTooltip(Map<String, double>? currentStats) {
+  if (currentStats == null || currentStats.isEmpty) return '정보 없음';
+
+  const List<String> statOrder = [
+    '모든속성강화',
+    '화속성강화',
+    '수속성강화',
+    '최종데미지',
+    '물리공격력',
+    '마법공격력',
+    '독립공격력',
+    '힘',
+    '지능',
+    '체력',
+    '정신력',
+    '물리크리티컬히트',
+    '마법크리티컬히트',
+    '공격력증폭',
+  ];
+
+  final sortedEntries = currentStats.entries.toList()
+    ..sort((a, b) {
+      final int aIndex = statOrder.indexOf(a.key);
+      final int bIndex = statOrder.indexOf(b.key);
+      final int aValue = aIndex == -1 ? 1 << 30 : aIndex;
+      final int bValue = bIndex == -1 ? 1 << 30 : bIndex;
+      if (aValue != bValue) return aValue.compareTo(bValue);
+      return a.key.compareTo(b.key);
+    });
+
+  return sortedEntries
+      .map((entry) => '• ${entry.key}: ${formatNumber(entry.value)}')
+      .join('\n');
+}
+
+/// 소수점 .0 이면 정수로, 아니면 그대로
+String formatNumber(num statValue) {
+  final intValue = statValue.toInt();
+  return (statValue == intValue) ? intValue.toString() : statValue.toString();
+}
