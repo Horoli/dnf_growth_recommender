@@ -94,7 +94,7 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
           ).center,
           _buildSlotGrid(getRightSlots).expand(),
         ],
-      ).sizedBox(height: 200),
+      ),
     );
   }
 
@@ -105,8 +105,8 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
     final int spent = plan.spent;
     final int remain = plan.remain;
     final int totalDelta = plan.totalDelta;
-    final Map<String, int> increaseStats = plan.increaseStats;
-    final List<MChosen> chosen = plan.chosen;
+    // final Map<String, int> increaseStats = plan.increaseStats;
+    // final List<MChosen> chosen = plan.chosen;
 
     return buildCommonCard(
       child: Column(
@@ -139,9 +139,22 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
               ).expand(),
             ],
           ).expand(),
-          if (increaseStats.isNotEmpty)
-            buildBudgetItem('총 스탯 증가', increaseStats, Colors.pink)
-                .sizedBox(width: double.infinity),
+        ],
+      ),
+    );
+  }
+
+  Widget buildSelectedEnchants(MRecommended data) {
+    final MPlan plan = data.plan!;
+    final Map<String, int> increaseStats = plan.increaseStats;
+    final List<MChosen> chosen = plan.chosen;
+    return buildCommonCard(
+      child: Column(
+        spacing: SIZE.SPACING,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildBudgetItem('총 스탯 증가', increaseStats, Colors.pink)
+              .sizedBox(width: double.infinity),
           Text(
             '선택된 아이템 (${chosen.length}개)',
             style: Theme.of(context)
@@ -175,7 +188,7 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
             label,
             style: TextStyle(
               color: color,
-              fontSize: 12,
+              fontSize: SIZE.FONT_SIZE_SUBTITLE,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -183,7 +196,7 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
             _formatNumber(value),
             style: TextStyle(
               color: color,
-              fontSize: 16,
+              fontSize: SIZE.FONT_SIZE_TITLE,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -265,7 +278,9 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
         data.enchantRecommendations;
 
     final List<MapEntry<String, MSlotRecommendation>> entries =
-        slotRecommendation.entries.toList();
+        slotRecommendation.entries
+            .where((e) => e.value.recommended.isNotEmpty) // 빈 항목 필터링
+            .toList();
 
     return buildCommonCard(
       child: Column(
@@ -284,23 +299,127 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
               children: entries.map((e) {
                 final String slotId = e.key; // 예: "weapon", "ring" ...
                 final MSlotRecommendation slot = e.value;
+                int recommendedLength = slot.recommended.length;
+
                 return ExpansionPanelRadio(
                   value: slotId,
                   headerBuilder: (context, isExpanded) {
-                    return Text('${slotId} ${slot.recommended.length}');
+                    return Text('${slot.slotName} ${slot.recommended.length}개');
                   },
-                  body: slot.recommended.isEmpty
-                      ? Text('empty')
-                      : Column(
-                          children: slot.recommended
-                              .map((MRecommendedEnchant enchant) {
-                            return Container(color: Colors.red).expand();
-                          }).toList(),
-                        ).sizedBox(height: 100),
+                  body: Column(
+                    children:
+                        slot.recommended.map((MRecommendedEnchant enchant) {
+                      return buildEnchantRecommendationItem(enchant);
+                    }).toList(),
+                  ).sizedBox(height: (150 * recommendedLength).toDouble()),
                 );
               }).toList(),
             ),
           ).expand(),
+        ],
+      ),
+    );
+  }
+
+  Widget buildEnchantRecommendationItem(MRecommendedEnchant enchant) {
+    final String itemUrl =
+        "${PATH.URL_BASE}/${PATH.URL_IMAGE}?type=item&id=${enchant.itemId}";
+    final int price = enchant.price!.lowestPrice;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.withAlpha(30)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        spacing: SIZE.SPACING,
+        children: [
+          Image.network(
+            itemUrl,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const Icon(Icons.image),
+          ).sizedBox(width: 50, height: 50),
+
+          // 슬롯/아이템 정보
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 6,
+            children: [
+              Row(
+                spacing: 8,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      enchant.slotName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (enchant.upgrade > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '+${enchant.upgrade}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              Text(
+                enchant.itemName,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                '${enchant.recStats}',
+                style: const TextStyle(
+                  fontSize: 12,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ).expand(),
+
+          // 가격/점수/효율
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            spacing: 2,
+            children: [
+              Text(
+                _formatNumber(price),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -418,7 +537,7 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
@@ -535,10 +654,6 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
         );
       },
     );
-  }
-
-  Widget aaaaaa(MRecommended data) {
-    return Container();
   }
 
   // 숫자 포맷팅

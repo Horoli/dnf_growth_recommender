@@ -47,6 +47,11 @@ String itemImgUrl(String base, String path, String id, {String? zoom}) {
 
 Widget buildCommonCard({Widget? child}) => Card(
       margin: const EdgeInsets.all(16),
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(
+          color: Color.fromARGB(255, 19, 57, 88),
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: child,

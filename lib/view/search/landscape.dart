@@ -22,6 +22,9 @@ class ViewSearchLandscapeState
         top: false,
         child: LayoutBuilder(
           builder: (context, constraints) {
+            // if (constraints.maxWidth < kMaxContentWidth) {
+            //   return Placeholder();
+            // }
             return Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
@@ -30,7 +33,7 @@ class ViewSearchLandscapeState
                 ),
                 child: Column(
                   children: [
-                    buildSearchFields().sizedBox(height: 100),
+                    buildSearchFields().sizedBox(height: 150),
                     buildMainContents().expand(),
                   ],
                 ),
@@ -64,21 +67,17 @@ class ViewSearchLandscapeState
         final String charUrl = "${PATH.URL_BASE}/${PATH.URL_IMAGE}"
             "?type=char&server=${data.character.serverId}"
             "&id=${data.character.characterId}&zoom=1";
-
-        return Row(
+        return Column(
           children: [
-            Column(
+            Row(
               children: [
-                buildCharacterDetails(charUrl, slots),
-                buildCommonCard(
-                    child: Container(
-                  width: double.infinity,
-                )).expand(),
+                buildCharacterDetails(charUrl, slots).sizedBox(width: 400),
+                if (data.plan != null) buildBudgetCard(data).expand(),
               ],
-            ).expand(),
-            if (data.plan != null) buildBudgetCard(data).expand(),
-            Column(
+            ).sizedBox(height: 300),
+            Row(
               children: [
+                buildSelectedEnchants(data).expand(),
                 buildEnchantRecommendationsList(data).expand(),
                 buildBestPerSlotList(data).expand(),
               ],

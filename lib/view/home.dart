@@ -8,8 +8,11 @@ class ViewHome extends StatefulWidget {
 }
 
 class ViewHomeState extends State<ViewHome> {
-  bool get isPort => MediaQuery.of(context).orientation == Orientation.portrait;
+  // bool get isPort => MediaQuery.of(context).orientation == Orientation.portrait;
+  double kMaxContentWidth = 1280; // 1920에서 좌우 320px 거터 확보
   double get fullHeight => MediaQuery.of(context).size.height;
+  double get fullWidth => MediaQuery.of(context).size.width;
+  bool get isPort => fullWidth < kMaxContentWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +30,7 @@ class ViewHomeState extends State<ViewHome> {
           Container(
             color: Colors.grey,
             width: double.infinity,
-            height: 100,
+            height: kToolbarHeight,
           )
         ],
       )),

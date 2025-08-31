@@ -92,3 +92,39 @@ extension AnimationExtensions on AnimationController {
     });
   }
 }
+
+@immutable
+class GradientTheme extends ThemeExtension<GradientTheme> {
+  final Gradient primaryGradient;
+  final Gradient secondaryGradient;
+
+  const GradientTheme({
+    required this.primaryGradient,
+    required this.secondaryGradient,
+  });
+
+  @override
+  ThemeExtension<GradientTheme> copyWith({
+    Gradient? primaryGradient,
+    Gradient? secondaryGradient,
+  }) {
+    return GradientTheme(
+      primaryGradient: primaryGradient ?? this.primaryGradient,
+      secondaryGradient: secondaryGradient ?? this.secondaryGradient,
+    );
+  }
+
+  @override
+  ThemeExtension<GradientTheme> lerp(
+    ThemeExtension<GradientTheme>? other,
+    double t,
+  ) {
+    if (other is! GradientTheme) return this;
+    return GradientTheme(
+      primaryGradient:
+          Gradient.lerp(primaryGradient, other.primaryGradient, t)!,
+      secondaryGradient:
+          Gradient.lerp(secondaryGradient, other.secondaryGradient, t)!,
+    );
+  }
+}

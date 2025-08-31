@@ -17,6 +17,7 @@ class AppRootState extends State<AppRoot> {
     return MaterialApp(
       initialRoute: PATH.ROUTE_SEARCH,
       routes: routes,
+      theme: ThemeData.dark(),
     );
   }
 }
