@@ -22,13 +22,13 @@ class ViewHomeState extends State<ViewHome> {
           child: Column(
         children: [
           SizedBox(
-            height: fullHeight * 1.2,
+            height: isPort ? fullHeight * 3 : fullHeight * 1.2,
             child: isPort
                 ? const ViewSearchPortrait()
                 : const ViewSearchLandscape(),
           ),
           Container(
-            color: Colors.grey,
+            // color: Colors.grey,
             width: double.infinity,
             height: kToolbarHeight,
           )

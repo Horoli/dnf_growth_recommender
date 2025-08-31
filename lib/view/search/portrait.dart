@@ -29,7 +29,7 @@ class ViewSearchPortraitState
                 child: Column(
                   children: [
                     buildSearchFields().sizedBox(height: 150),
-                    // buildMainContents().expand(),
+                    buildMainContents().expand(),
                   ],
                 ),
               ),
@@ -37,6 +37,42 @@ class ViewSearchPortraitState
           },
         ),
       ),
+    );
+  }
+
+  Widget buildMainContents() {
+    return StreamBuilder(
+      stream: GServiceDnf.subject.browse,
+      builder: (context, AsyncSnapshot<MRecommended> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Row(
+            spacing: SIZE.SPACING,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('캐릭터를 검색하세요'),
+              Icon(Icons.search),
+            ],
+          ).center;
+        }
+
+        final MRecommended data = snapshot.data!;
+        final Map<String, MSlotRecommendation> slots =
+            data.enchantRecommendations;
+
+        final String charUrl = "${PATH.URL_BASE}/${PATH.URL_IMAGE}"
+            "?type=char&server=${data.character.serverId}"
+            "&id=${data.character.characterId}&zoom=1";
+        return Column(
+          children: [
+            buildCharacterDetails(charUrl, slots)
+                .sizedBox(width: double.infinity),
+            buildBudgetCard(data).sizedBox(width: double.infinity, height: 250),
+            buildSelectedEnchants(data).expand(),
+            buildEnchantRecommendationsList(data).expand(),
+            buildBestPerSlotList(data).expand(),
+          ],
+        );
+      },
     );
   }
 }
