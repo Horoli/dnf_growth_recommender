@@ -9,10 +9,15 @@ abstract class AbstractViewSearch extends StatefulWidget {
 
 abstract class AbstractViewSearchState<T extends AbstractViewSearch>
     extends State<T> {
-  final TextEditingController ctlServer =
-      TextEditingController(text: "casillas");
-  final TextEditingController ctlId = TextEditingController(text: 'horoli');
-  final TextEditingController ctlGold = TextEditingController(text: '50000000');
+  final TextEditingController ctlServer = TextEditingController(
+      // text: "casillas",
+      );
+  final TextEditingController ctlId = TextEditingController(
+      // text: 'horoli',
+      );
+  final TextEditingController ctlGold = TextEditingController(
+      // text: '50000000',
+      );
 
   String selectedSlotType = '';
 
@@ -58,11 +63,33 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
         IconButton(
           icon: const Icon(Icons.search),
           onPressed: () async {
-            await GServiceDnf.getRecommendation(
+            if (ctlGold.text.isEmpty) {
+              return showSnackbar(context, '보유 골드를 입력하세요');
+            }
+            if (ctlServer.text.isEmpty) {
+              return showSnackbar(context, '서버를 선택하세요');
+            }
+
+            if (ctlId.text.isEmpty) {
+              return showSnackbar(context, '캐릭터 id를 입력하세요');
+            }
+
+            HResponse<MRecommended> response =
+                await GServiceDnf.getRecommendation(
               server: ctlServer.text,
               id: ctlId.text,
-              gold: ctlGold.text.isEmpty ? null : ctlGold.text,
+              // gold: ctlGold.text.isEmpty ? null : ctlGold.text,
+              gold: ctlGold.text,
             );
+
+            if (!response.isSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(response.errorMessage ?? '알 수 없는 오류'),
+                  backgroundColor: Colors.red[100],
+                ),
+              );
+            }
           },
         ),
       ],

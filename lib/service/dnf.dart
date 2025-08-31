@@ -10,42 +10,46 @@ class ServiceDnf {
   CustomSubject<MRecommended> subject = CustomSubject<MRecommended>();
 
   /// 추천 결과를 타입 세이프한 모델로 반환
-  Future<MRecommended?> getRecommendation({
+  Future<HResponse<MRecommended>> getRecommendation({
     String server = 'casillas',
     String id = 'horoli',
-    String? gold,
+    required String gold,
   }) async {
     try {
-      final Uri url = gold == null
-          ? Uri.parse(
-              '${PATH.URL_BASE}/${PATH.URL_RECOMMEND}?server=$server&name=$id&limit=5',
-            )
-          : Uri.parse(
-              '${PATH.URL_BASE}/${PATH.URL_RECOMMEND}?server=$server&name=$id&gold=$gold&limit=5',
-            );
+      final Uri url = Uri.parse(
+        '${PATH.URL_BASE}/${PATH.URL_RECOMMEND}?server=$server&name=$id&gold=$gold&limit=5',
+      );
 
       final http.Response response = await http.get(url);
 
       if (response.statusCode == 200) {
-        // ✅ JSON → Model 파싱
         final Map<String, dynamic> data = json.decode(response.body);
         final MRecommended result = MRecommended.fromJson(data);
-        // 디버깅용 출력
+
         print('[DNF] character=${result.character.characterName} '
             'slots=${result.summary.totalSlots}');
 
         subject.sink(result);
-        return result;
+        return HResponse.success(result);
       } else {
-        // 에러 응답 로그
         print('Request failed with status: ${response.statusCode}');
         print('Response body: ${response.body}');
-        return null;
+
+        // 상태 코드별 에러 메시지
+        String errorMessage = switch (response.statusCode) {
+          404 => '캐릭터를 찾을 수 없습니다.${response.body}',
+          500 => '서버 오류가 발생했습니다.',
+          _ => '요청 실패 (${response.statusCode})',
+        };
+
+        return HResponse.error(
+          message: errorMessage,
+          statusCode: response.statusCode,
+        );
       }
     } catch (e) {
-      // 네트워크/파싱 예외 처리
       print('Error occurred: $e');
-      return null;
+      return HResponse.networkError('네트워크 오류: $e');
     }
   }
 }

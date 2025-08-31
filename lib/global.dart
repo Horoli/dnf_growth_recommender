@@ -98,3 +98,64 @@ String formatNumber(num statValue) {
   final intValue = statValue.toInt();
   return (statValue == intValue) ? intValue.toString() : statValue.toString();
 }
+
+void showSnackbar(BuildContext context, String message, {Color? color}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      duration: const Duration(seconds: 2),
+      content: Text(message),
+      backgroundColor: color,
+    ),
+  );
+}
+
+class HResponse<T> {
+  final bool isSuccess;
+  final T? data;
+  final String? errorMessage;
+  final int? statusCode;
+
+  HResponse._({
+    required this.isSuccess,
+    this.data,
+    this.errorMessage,
+    this.statusCode,
+  });
+
+  // 성공 응답
+  factory HResponse.success(T data) {
+    return HResponse._(
+      isSuccess: true,
+      data: data,
+    );
+  }
+
+  // 에러 응답
+  factory HResponse.error({
+    required String message,
+    int? statusCode,
+  }) {
+    return HResponse._(
+      isSuccess: false,
+      errorMessage: message,
+      statusCode: statusCode,
+    );
+  }
+
+  // 네트워크 에러
+  factory HResponse.networkError(String message) {
+    return HResponse._(
+      isSuccess: false,
+      errorMessage: message,
+      statusCode: null,
+    );
+  }
+
+  // 파싱 에러
+  factory HResponse.parseError(String message) {
+    return HResponse._(
+      isSuccess: false,
+      errorMessage: message,
+    );
+  }
+}

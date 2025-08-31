@@ -1,6 +1,6 @@
 const String ROUTE_SEARCH = '';
 
-const String URL_BASE = 'http://192.168.0.17:3000';
+const String URL_BASE = 'http://172.16.0.6:9017';
 
 const String URL_IMAGE = 'image';
 const String URL_RECOMMEND = 'recommend';
