@@ -53,43 +53,21 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
           },
         ).expand(),
         TextField(
-          controller: ctlId,
-          decoration: const InputDecoration(labelText: 'ID'),
-        ).expand(),
+            controller: ctlId,
+            decoration: const InputDecoration(labelText: 'ID'),
+            onEditingComplete: () async {
+              await postRecommedation();
+            }).expand(),
         TextField(
-          controller: ctlGold,
-          decoration: const InputDecoration(labelText: '보유 골드'),
-        ).expand(),
+            controller: ctlGold,
+            decoration: const InputDecoration(labelText: '보유 골드'),
+            onEditingComplete: () async {
+              await postRecommedation();
+            }).expand(),
         IconButton(
           icon: const Icon(Icons.search),
           onPressed: () async {
-            if (ctlGold.text.isEmpty) {
-              return showSnackbar(context, '보유 골드를 입력하세요');
-            }
-            if (ctlServer.text.isEmpty) {
-              return showSnackbar(context, '서버를 선택하세요');
-            }
-
-            if (ctlId.text.isEmpty) {
-              return showSnackbar(context, '캐릭터 id를 입력하세요');
-            }
-
-            HResponse<MRecommended> response =
-                await GServiceDnf.getRecommendation(
-              server: ctlServer.text,
-              id: ctlId.text,
-              // gold: ctlGold.text.isEmpty ? null : ctlGold.text,
-              gold: ctlGold.text,
-            );
-
-            if (!response.isSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(response.errorMessage ?? '알 수 없는 오류'),
-                  backgroundColor: Colors.red[100],
-                ),
-              );
-            }
+            await postRecommedation();
           },
         ),
       ],
@@ -681,6 +659,35 @@ abstract class AbstractViewSearchState<T extends AbstractViewSearch>
         );
       },
     );
+  }
+
+  Future<void> postRecommedation() async {
+    if (ctlGold.text.isEmpty) {
+      return showSnackbar(context, '보유 골드를 입력하세요');
+    }
+    if (ctlServer.text.isEmpty) {
+      return showSnackbar(context, '서버를 선택하세요');
+    }
+
+    if (ctlId.text.isEmpty) {
+      return showSnackbar(context, '캐릭터 id를 입력하세요');
+    }
+
+    HResponse<MRecommended> response = await GServiceDnf.getRecommendation(
+      server: ctlServer.text,
+      id: ctlId.text,
+      // gold: ctlGold.text.isEmpty ? null : ctlGold.text,
+      gold: ctlGold.text,
+    );
+
+    if (!response.isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.errorMessage ?? '알 수 없는 오류'),
+          backgroundColor: Colors.red[100],
+        ),
+      );
+    }
   }
 
   // 숫자 포맷팅
